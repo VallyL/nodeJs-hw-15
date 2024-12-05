@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    Simple Chat
+  </head>
+  <body>
+    <h1>Simple Chat</h1>
+    <div id="message"></div>
+    <input id="m" autocomplete="off" />
+    <button id="send">Send Message</button>
+    <script type="module">
+      import io from "https://cdn.socket.io/4.7.2/socket.io.esm.min.js";
+
+      const socket = io();
+      const messageInput = document.querySelector("#m");
+      const sendButton = document.querySelector("#send");
+      const messageDiv = document.querySelector("#message");
+
+      sendButton.addEventListener("click", () => {
+        const message = messageInput.value;
+        try {
+          socket.emit("chat message", message);
+          messageInput.value = "";
+        } catch (error) {
+          console.error("Error sending message: ", error);
+        }
+      });
+
+      socket.on("server response", (msg) => {
+        const item = document.createElement("li");
+        item.textContent = msg;
+        messageDiv.appendChild(item);
+      });
+
+      socket.on("connect_error", (error) => {
+        console.error("Connect error: ", error);
+        messageDiv.textContent = "Error connecting to chat server.";
+      });
+
+      socket.on("disconnect", (reason) => {
+        console.log("Disconnected", reason);
+        messageDiv.textContent = "Disconnected from the chat server.";
+      });
+    </script>
+  </body>
+</html>
